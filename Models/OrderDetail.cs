@@ -14,6 +14,4 @@ namespace TestWeb.Models
         public Order? Order { get; set; }
         public Books? Book { get; set; }
     }
-
-
 }

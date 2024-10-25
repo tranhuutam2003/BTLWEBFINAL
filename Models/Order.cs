@@ -15,6 +15,4 @@ namespace TestWeb.Models
         public ICollection<OrderDetail>? OrderDetails { get; set; }
         public Payment? Payment { get; set; }
     }
-
-
 }

@@ -93,8 +93,6 @@ namespace TestWeb.Controllers
 
             return RedirectToAction("Index");
         }
-
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> DecreaseQuantity(int bookId)
         {

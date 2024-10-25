@@ -10,9 +10,6 @@ namespace TestWeb.Models
         public DateTime PaymentDate { get; set; }
         public string? PaymentMethod { get; set; }
         public string? PaymentStatus { get; set; }
-
         public Order? Order { get; set; }
     }
-
-
 }

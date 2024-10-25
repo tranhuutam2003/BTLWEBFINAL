@@ -6,10 +6,9 @@ namespace TestWeb.Models
     {
         [Key]
         public int CategoryID { get; set; }
+        [Required(ErrorMessage = "Tên danh mục không được để trống.")]
         public string? CategoryName { get; set; }
 
         public ICollection<Books>? Books { get; set; }
     }
-
-
 }

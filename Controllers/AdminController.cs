@@ -37,6 +37,15 @@ namespace TestWeb.Controllers
             return View(books);
         }
 
+        public IActionResult Categories(int? page)
+        {
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var categories = _context.Categories.ToPagedList(pageNumber, pageSize);
+            return View(categories);
+        }
+
         [HttpGet]
         public IActionResult AddBook()
         {
@@ -104,6 +113,25 @@ namespace TestWeb.Controllers
             return View(book);
         }
 
+        [HttpGet]
+        public IActionResult AddCategory()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCategory(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Categories));
+            }
+            return View(category);
+        }
+
         // Sửa sản phẩm - Hiển thị form sửa
         [HttpGet]
         public IActionResult EditBook(int id)
@@ -166,12 +194,60 @@ namespace TestWeb.Controllers
             return View(book);  // Nếu không hợp lệ, hiển thị lại form với dữ liệu hiện tại
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(int id, Category category)
+        {
+            if (id != category.CategoryID)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(category);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!CategoryExists(category.CategoryID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Categories));
+            }
+            return View(category);
+        }
+
         // Xóa sản phẩm
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteBook(int id)
         {
-            var book = _context.Books.Find(id); // Tìm sách theo id
+            var book = _context.Books.Find(id);
             if (book == null)
             {
                 return NotFound();
@@ -179,17 +255,68 @@ namespace TestWeb.Controllers
 
             // Xóa sách khỏi DbContext
             _context.Books.Remove(book);
-            _context.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
+            _context.SaveChanges(); 
 
             return RedirectToAction("AllBooks");
         }
 
-        // Xem doanh thu (bỏ comment nếu cần sử dụng)
-        // public IActionResult Revenue()
-        // {
-        //     var revenues = _context.Revenues.ToList();
-        //     return View(revenues);
-        // }
+        [HttpPost, ActionName("DeleteCategory")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Categories));
+        }
+
+        private bool CategoryExists(int id)
+        {
+            return _context.Categories.Any(e => e.CategoryID == id);
+        }
+
+        [HttpGet]
+        public IActionResult SearchBooks(string query, int? page)
+        {
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var searchResults = _context.Books
+                .Include(b => b.Category)
+                .AsNoTracking()
+                .Where(x => x.Title.Contains(query) ||
+                            x.Author.Contains(query) ||
+                            x.Publisher.Contains(query) ||
+                            x.Category.CategoryName.Contains(query))
+                .OrderBy(x => x.Title);
+
+            var pagedResults = searchResults.ToPagedList(pageNumber, pageSize);
+
+            ViewBag.Query = query;
+            return View(pagedResults);
+        }
+
+        [HttpGet]
+        public IActionResult SearchCategories(string query, int? page)
+        {
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var searchResults = _context.Categories
+                .AsNoTracking()
+                .Where(c => c.CategoryName.Contains(query))
+                .OrderBy(c => c.CategoryName);
+
+            var pagedResults = searchResults.ToPagedList(pageNumber, pageSize);
+
+            ViewBag.Query = query;
+            return View(pagedResults);
+        }
 
         public IActionResult Logout()
         {

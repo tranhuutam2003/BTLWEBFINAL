@@ -1,11 +1,10 @@
 ﻿
 @{
     ViewData["Title"] = "BookDetail";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Product/ProductLayout.cshtml";
 }
 
 @model TestWeb.ViewModel.DetailViewModel;
-
 <section class="product-details spad">
     <div class="container">
         <div class="row">
@@ -47,7 +46,9 @@
                             </div>
                         </div>
                     </div>
-                    <a href="#" class="primary-btn">ADD TO CARD</a>
+                    <a href="@Url.Action("AddToCart", "Cart", new { bookId = Model.books.BookID })" class="primary-btn">
+                        ADD TO CART
+                    </a>
                     <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
                     <ul>
                         <li><b>Author</b> <span>@Model.books.Author</span></li>

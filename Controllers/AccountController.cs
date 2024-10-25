@@ -209,6 +209,63 @@ namespace TestWeb.Controllers
             return View(user);
         }
 
+        [HttpGet]
+        public IActionResult EditProfile()
+        {
+            var userEmail = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult EditProfile(User updatedUser)
+        {
+            var userEmail = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                user.FullName = updatedUser.FullName;
+                user.PhoneNumber = updatedUser.PhoneNumber;
+                user.Address = updatedUser.Address;
+
+                if (!string.IsNullOrEmpty(updatedUser.Password))
+                {
+                    user.Password = updatedUser.Password; // Note: In a real application, you should hash the password
+                }
+
+                _context.Update(user);
+                _context.SaveChanges();
+
+                HttpContext.Session.SetString("FullName", user.FullName);
+                HttpContext.Session.SetString("PhoneNumber", user.PhoneNumber);
+
+                TempData["SuccessMessage"] = "Profile updated successfully!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(updatedUser);
+        }
+
 
         public IActionResult Logout()
         {

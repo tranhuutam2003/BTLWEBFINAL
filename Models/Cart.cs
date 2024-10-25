@@ -10,7 +10,7 @@ namespace TestWeb.Models
 
         public void AddItem(Books book, int quantity)
         {
-            var item = Items.FirstOrDefault(i => i.Book.BookID == book.BookID);
+            var item = Items.FirstOrDefault(i => i.Book != null && i.Book.BookID == book.BookID);
             if (item == null)
             {
                 Items.Add(new CartItem { Book = book, Quantity = quantity });
@@ -23,9 +23,10 @@ namespace TestWeb.Models
 
         public void RemoveItem(int bookId)
         {
-            Items.RemoveAll(i => i.Book.BookID == bookId);
+            Items.RemoveAll(i => i.Book != null && i.Book.BookID == bookId);
         }
 
-        public decimal TotalAmount => Items.Sum(i => (i.Book.Price ?? 0) * i.Quantity);
+        public decimal TotalAmount => Items.Sum(i =>
+            (i.Book != null && i.Book.Price.HasValue ? i.Book.Price.Value : 0) * i.Quantity);
     }
 }

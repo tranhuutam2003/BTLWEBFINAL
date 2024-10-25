@@ -40,9 +40,13 @@
                             else
                             {
                                 <div class="header__user">
-                                    <span>Hello, @Context.Session.GetString("Username")</span>
-                                    <span> | </span>
-                                    <span><a asp-controller="Account" asp-action="Logout">Đăng xuất</a></span>
+                                    <span class="username">Hello, @Context.Session.GetString("Username")</span>
+                                    <div class="user-menu">
+                                        <ul>
+                                            <li><a asp-controller="Account" asp-action="EditProfile">Sửa thông tin</a></li>
+                                            <li><a asp-controller="Account" asp-action="Logout">Đăng xuất</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -92,3 +96,49 @@
         </div>
     </div>
 </header>
+
+<style>
+    .header__user {
+        position: relative;
+    }
+
+    .user-menu {
+        display: none; /* Ẩn menu ban đầu */
+        position: absolute;
+        background: white; /* Nền menu */
+        border: 1px solid #ccc; /* Viền menu */
+        padding: 10px;
+        z-index: 100; /* Đảm bảo menu nằm trên các phần tử khác */
+    }
+
+    .header__user:hover .user-menu,
+    .header__user:focus-within .user-menu {
+        display: block; /* Hiện menu khi hover hoặc focus */
+    }
+
+    .user-menu ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .user-menu li {
+        margin: 0; /* Không có khoảng cách giữa các mục */
+    }
+
+    .user-menu a {
+        text-decoration: none;
+        color: black; /* Đổi màu chữ thành đen */
+    }
+
+        .user-menu a:hover {
+            text-decoration: underline; /* Gạch chân khi hover */
+        }
+</style>
+
+<script>
+    document.querySelector('.username').addEventListener('click', function () {
+        const menu = document.querySelector('.user-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+</script>
