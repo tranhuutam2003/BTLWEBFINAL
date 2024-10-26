@@ -1,0 +1,51 @@
+﻿@{
+    Layout = "~/Views/Order/OrderLayout.cshtml";
+}
+
+@model List<TestWeb.Models.Order>
+
+@{
+    ViewData["Title"] = "Theo dõi đơn hàng";
+}
+
+<h2>Theo dõi đơn hàng</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Mã đơn hàng</th>
+            <th>Trạng thái</th>
+            <th>Ngày đặt hàng</th>
+            <th>Chi tiết</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderID</td>
+                <td>@order.Status</td>
+                <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <a href="@Url.Action("OrderDetails", "Order", new { orderId = order.OrderID })">Xem chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .build();
+
+    connection.on("OrderStatusUpdated", function () {
+        alert("Trạng thái đơn hàng đã được cập nhật!");
+        location.reload(); // Tải lại trang để xem các trạng thái mới
+    });
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>

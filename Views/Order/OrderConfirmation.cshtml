@@ -1,0 +1,16 @@
+﻿@{
+    Layout = "~/Views/Order/OrderLayout.cshtml";
+}
+
+@model TestWeb.Models.Order
+
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+}
+
+<h2>Xác nhận đơn hàng</h2>
+
+<p>Cảm ơn bạn đã đặt hàng! Mã đơn hàng của bạn là: @Model.OrderID</p>
+<p>Trạng thái: @Model.Status</p>
+
+<a href="@Url.Action("TrackOrder", "Order")">Theo dõi đơn hàng của bạn</a>

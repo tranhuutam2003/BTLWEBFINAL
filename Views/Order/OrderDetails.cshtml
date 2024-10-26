@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "~/Views/Order/OrderLayout.cshtml";
+}
+
+@model TestWeb.Models.Order
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<h2>Chi tiết đơn hàng @Model.OrderID</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tên sách</th>
+            <th>Số lượng</th>
+            <th>Giá</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <tr>
+                <td>@detail.Book.Title</td>
+                <td>@detail.Quantity</td>
+                <td>@detail.Price.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>Trạng thái: @Model.Status</p>
+<p>Tổng số tiền: @Model.TotalAmount.ToString("C")</p>
+
+<a href="@Url.Action("TrackOrder", "Order")">Quay lại</a>

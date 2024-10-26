@@ -1,0 +1,49 @@
+﻿@{
+    Layout = "~/Views/Order/OrderLayout.cshtml";
+}
+
+@model TestWeb.Models.Order
+
+<h2>Đặt Hàng</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="PlaceOrder" method="post">
+    <h4>Giỏ hàng của bạn:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tên Sản Phẩm</th>
+                <th>Số Lượng</th>
+                <th>Giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@item.Book?.Title</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Price.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h5>Tổng cộng: @Model.TotalAmount.ToString("C")</h5>
+
+    <div class="form-group">
+        <label for="shippingAddress">Địa chỉ giao hàng:</label>
+        <input type="text" name="shippingAddress" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đặt hàng</button>
+</form>

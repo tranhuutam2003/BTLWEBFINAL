@@ -11,10 +11,14 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("BookContext")));
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
+builder.Services.AddHostedService<OrderStatusUpdateService>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSession();
+
+builder.Services.AddSignalR();
 
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -22,6 +26,12 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -43,6 +53,8 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 app.UseAuthentication();
+
+app.MapHub<OrderHub>("/orderHub");
 
 app.MapControllerRoute(
     name: "default",

@@ -11,6 +11,8 @@ namespace TestWeb.Models
         public decimal TotalAmount { get; set; }
         public string? Status { get; set; }
 
+        public string? ShippingAddress { get; set; }
+
         public User? User { get; set; }
         public ICollection<OrderDetail>? OrderDetails { get; set; }
         public Payment? Payment { get; set; }

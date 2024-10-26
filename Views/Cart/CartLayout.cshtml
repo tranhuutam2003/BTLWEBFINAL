@@ -97,7 +97,7 @@
                             <li>Subtotal <span>@Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture)</span></li>
                             <li>Total <span>@Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture)</span></li>
                         </ul>
-                        <a href="#" class="primary-btn">PROCEED TO CHECKOUT</a>
+                        <a asp-controller="Order" asp-action="Checkout" class="primary-btn">PROCEED TO CHECKOUT</a>
                     </div>
                 </div>
             </div>

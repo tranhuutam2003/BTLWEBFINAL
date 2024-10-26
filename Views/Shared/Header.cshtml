@@ -43,6 +43,7 @@
                                     <span class="username">Hello, @Context.Session.GetString("Username")</span>
                                     <div class="user-menu">
                                         <ul>
+                                            <li><a href="@Url.Action("TrackOrder", "Order")">Đơn hàng</a></li>
                                             <li><a asp-controller="Account" asp-action="EditProfile">Sửa thông tin</a></li>
                                             <li><a asp-controller="Account" asp-action="Logout">Đăng xuất</a></li>
                                         </ul>
