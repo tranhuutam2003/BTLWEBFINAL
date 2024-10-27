@@ -1,8 +1,15 @@
 ﻿@{
     Layout = "~/Views/Admin/AdminLayout.cshtml";
 }
+<<<<<<< HEAD
 
 @model IEnumerable<TestWeb.Models.Order>
+=======
+@model IEnumerable<TestWeb.Models.Order>
+
+
+
+>>>>>>> bee74f0914b6bff66cd25636452dff561249330f
 
 <h2>Danh sách đơn hàng</h2>
 
@@ -23,7 +30,8 @@
                 <td>@order.OrderID</td>
                 <td>@order.Status</td>
                 <td>@order.OrderDate.ToString("g")</td>
-                <td>@order.TotalAmount.ToString("C")</td>
+                 <td>@order.TotalAmount.ToString("C")</td> 
+
                 <td>
                     <a asp-action="OrderConfirmation" asp-route-orderId="@order.OrderID">Xem</a>
                 </td>

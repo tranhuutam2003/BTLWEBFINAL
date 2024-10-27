@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TestWeb.Models;
-using TestWeb.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using TestWeb.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
+using TestWeb.Data;
+using TestWeb.Models;
+using TestWeb.Models.Authentication;
 using X.PagedList;
 
 namespace TestWeb.Controllers
@@ -255,7 +255,7 @@ namespace TestWeb.Controllers
 
             // Xóa sách khỏi DbContext
             _context.Books.Remove(book);
-            _context.SaveChanges(); 
+            _context.SaveChanges();
 
             return RedirectToAction("AllBooks");
         }
@@ -324,5 +324,20 @@ namespace TestWeb.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
+        public IActionResult Dashboard()
+        {
+            //Trước khi đó phải kiểm tra xem ở bảng database  Order có TotalAmount >0 trong trạng thái Status ="Complete"
+            var totalRevenue = _context.Orders
+                .Where(o => o.Status == "Complete")
+                .Sum(o => (decimal?)o.TotalAmount) ?? 0;
+
+            // Debug log
+            Console.WriteLine($"Total Revenue: {totalRevenue}");
+
+            ViewBag.TotalRevenue = totalRevenue;
+
+            return View();
+        }
+
     }
 }
