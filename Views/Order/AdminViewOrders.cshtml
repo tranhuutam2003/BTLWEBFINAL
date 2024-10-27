@@ -1,4 +1,10 @@
-﻿@model IEnumerable<TestWeb.Models.Order>
+﻿@{
+    Layout = "~/Views/Admin/AdminLayout.cshtml";
+}
+@model IEnumerable<TestWeb.Models.Order>
+
+
+
 
 <h2>Danh sách đơn hàng</h2>
 
@@ -19,7 +25,8 @@
                 <td>@order.OrderID</td>
                 <td>@order.Status</td>
                 <td>@order.OrderDate.ToString("g")</td>
-                <td>@order.TotalAmount.ToString("C")</td>
+                 <td>@order.TotalAmount.ToString("C")</td> 
+
                 <td>
                     <a asp-action="OrderConfirmation" asp-route-orderId="@order.OrderID">Xem</a>
                 </td>

@@ -1,11 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using TestWeb.Data;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 
 public class OrderStatusUpdateService : IHostedService
 {
@@ -46,6 +40,10 @@ public class OrderStatusUpdateService : IHostedService
                     else if (order.Status == "Waiting for Pickup")
                     {
                         order.Status = "Waiting for Delivery"; // Tiếp tục chuyển
+                    }
+                    else if (order.Status == "Waiting for Delivery")
+                    {
+                        order.Status = "Complete";
                     }
                     // Cập nhật đơn hàng
                     _context.Orders.Update(order);

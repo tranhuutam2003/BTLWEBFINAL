@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Net.Mail;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Net.Mail;
 using TestWeb.Data;
 using TestWeb.Models;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
 using TestWeb.Models.Authentication;
 
 namespace TestWeb.Controllers
@@ -61,8 +58,61 @@ namespace TestWeb.Controllers
         }
 
         // Đặt hàng và gửi email xác nhận
+        //[HttpPost]
+        //public ActionResult PlaceOrder(Order order)
+        //{
+        //    var userPhoneNumber = HttpContext.Session.GetString("PhoneNumber");
+        //    if (string.IsNullOrEmpty(userPhoneNumber))
+        //    {
+        //        return RedirectToAction("Login", "Account");
+        //    }
+
+        //    // Lấy giỏ hàng hiện tại
+        //    var cart = _context.Carts
+        //        .Include(c => c.Items)
+        //        .ThenInclude(i => i.Book)
+        //        .FirstOrDefault(c => c.PhoneNumber == userPhoneNumber);
+
+        //    if (cart == null || !cart.Items.Any())
+        //    {
+        //        TempData["Error"] = "Giỏ hàng của bạn hiện đang trống.";
+        //        return RedirectToAction("Index", "Cart");
+        //    }
+
+        //    // Tạo đơn hàng mới
+        //    order.PhoneNumber = userPhoneNumber;
+        //    order.OrderDate = DateTime.Now;
+        //    order.Status = "Pending Confirmation";
+
+        //    _context.Orders.Add(order);
+        //    _context.SaveChanges();
+
+        //    // Thêm chi tiết đơn hàng từ các mục trong giỏ hàng
+        //    foreach (var item in cart.Items)
+        //    {
+        //        var orderDetail = new OrderDetail
+        //        {
+        //            OrderID = order.OrderID,
+        //            BookID = item.Book?.BookID ?? 0,
+        //            Quantity = item.Quantity,
+        //            Price = item.Book?.Price ?? 0
+        //        };
+        //        _context.OrderDetails.Add(orderDetail);
+        //    }
+
+        //    _context.SaveChanges();
+
+        //    // Xóa giỏ hàng sau khi đặt hàng thành công
+        //    _context.CartItems.RemoveRange(cart.Items);
+        //    _context.SaveChanges();
+
+        //    TempData["Success"] = "Đặt hàng thành công!";
+        //    SendOrderConfirmationEmail(userPhoneNumber, order.OrderID);
+
+        //    return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
+        //}
         [HttpPost]
-        public ActionResult PlaceOrder(Order order)
+        public ActionResult PlaceOrder(Order order)//update lại
         {
             var userPhoneNumber = HttpContext.Session.GetString("PhoneNumber");
             if (string.IsNullOrEmpty(userPhoneNumber))
@@ -87,8 +137,11 @@ namespace TestWeb.Controllers
             order.OrderDate = DateTime.Now;
             order.Status = "Pending Confirmation";
 
+            // Tính toán tổng số tiền từ giỏ hàng
+            order.TotalAmount = cart.TotalAmount; // Hoặc tính toán lại từ OrderDetail nếu cần
+
             _context.Orders.Add(order);
-            _context.SaveChanges();
+            _context.SaveChanges(); // Lưu đơn hàng đầu tiên để có OrderID
 
             // Thêm chi tiết đơn hàng từ các mục trong giỏ hàng
             foreach (var item in cart.Items)
@@ -103,7 +156,7 @@ namespace TestWeb.Controllers
                 _context.OrderDetails.Add(orderDetail);
             }
 
-            _context.SaveChanges();
+            _context.SaveChanges(); // Lưu chi tiết đơn hàng
 
             // Xóa giỏ hàng sau khi đặt hàng thành công
             _context.CartItems.RemoveRange(cart.Items);
@@ -114,6 +167,7 @@ namespace TestWeb.Controllers
 
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
         }
+
 
         public IActionResult TrackOrder()
         {
@@ -232,11 +286,11 @@ namespace TestWeb.Controllers
                 }
                 else if (order.Status == "Waiting for Pickup")
                 {
-                    order.Status = "Waiting for Delivery";
+                    order.Status = "Waiting for Delivery";// Hoặc trạng thái tương ứng
                 }
                 else if (order.Status == "Waiting for Delivery")
                 {
-                    order.Status = "Delivered"; // Hoặc trạng thái tương ứng
+                    order.Status = "Complete"; // Hoặc trạng thái tương ứng
                 }
 
                 // Lưu thay đổi vào cơ sở dữ liệu
@@ -257,8 +311,15 @@ namespace TestWeb.Controllers
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Book)
                 .ToList();
+            // Tính toán lại TotalAmount cho mỗi đơn hàng nếu chưa có giá trị chính xác
+            foreach (var order in orders)
+            {
+                order.TotalAmount = order.OrderDetails.Sum(od => od.Price * od.Quantity);
+            }
 
             return View(orders); // Trả về view hiển thị danh sách đơn hàng
         }
+
+
     }
 }
