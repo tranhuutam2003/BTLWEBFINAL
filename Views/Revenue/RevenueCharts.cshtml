@@ -1,0 +1,57 @@
+﻿@{
+    Layout = "~/Views/Admin/AdminLayout.cshtml";
+}
+
+<h2>Biểu đồ Doanh thu</h2>
+
+<!-- Form chọn ngày -->
+<div>
+    <label for="startDate">Từ ngày:</label>
+    <input type="date" id="startDate" name="startDate">
+    <label for="endDate">Đến ngày:</label>
+    <input type="date" id="endDate" name="endDate">
+    <button onclick="loadRevenueByDateRange()">Xem Doanh thu</button>
+</div>
+
+<!-- Biểu đồ -->
+<canvas id="customRevenueChart" width="800" height="400"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadRevenueByDateRange() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        if (!startDate || !endDate) {
+            alert("Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+
+        const response = await fetch(`/api/revenue/custom?startDate=${startDate}&endDate=${endDate}`);
+        const data = await response.json();
+
+        const labels = data.map(item => new Date(item.date).toLocaleDateString());
+        const values = data.map(item => item.totalSales);
+
+        const ctx = document.getElementById('customRevenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu theo ngày',
+                    data: values,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Ngày' } },
+                    y: { title: { display: true, text: 'Doanh thu (VND)' } }
+                }
+            }
+        });
+    }
+</script>

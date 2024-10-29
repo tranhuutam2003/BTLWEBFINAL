@@ -70,7 +70,7 @@ namespace TestWeb.Controllers
         {
             if (!IsUserLoggedIn())
             {
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, redirectUrl = Url.Action("Login", "Account") });
             }
 
             var phoneNumber = HttpContext.Session.GetString("PhoneNumber");
@@ -86,17 +86,18 @@ namespace TestWeb.Controllers
                 {
                     cart.AddItem(book, 1);
                     await _context.SaveChangesAsync();
+                    return Json(new { success = true, quantity = cart.Items.First(i => i.Book.BookID == bookId).Quantity });
                 }
             }
 
-            return RedirectToAction("Index");
+            return Json(new { success = false });
         }
         [HttpPost]
         public async Task<IActionResult> DecreaseQuantity(int bookId)
         {
             if (!IsUserLoggedIn())
             {
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, redirectUrl = Url.Action("Login", "Account") });
             }
 
             var phoneNumber = HttpContext.Session.GetString("PhoneNumber");
@@ -119,10 +120,11 @@ namespace TestWeb.Controllers
                         cart.RemoveItem(bookId);
                     }
                     await _context.SaveChangesAsync();
+                    return Json(new { success = true, quantity = item.Quantity });
                 }
             }
 
-            return RedirectToAction("Index");
+            return Json(new { success = false });
         }
 
         public async Task<IActionResult> RemoveFromCart(int bookId)

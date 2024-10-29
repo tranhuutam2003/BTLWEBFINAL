@@ -33,13 +33,9 @@ else
                         </div>
                     <td>@item.Book.Price</td>
                     <td>
-                        <form method="post" asp-action="DecreaseQuantity" asp-route-bookId="@item.Book.BookID" style="display:inline;">
-                            <button type="submit" class="btn btn-danger">-</button>
-                        </form>
-                        @item.Quantity
-                        <form method="post" asp-action="IncreaseQuantity" asp-route-bookId="@item.Book.BookID" style="display:inline;">
-                            <button type="submit" class="btn btn-primary">+</button>
-                        </form>
+                        <button class="btn btn-danger" onclick="updateQuantity(@item.Book.BookID, 'decrease')">-</button>
+                        <span id="quantity-@item.Book.BookID">@item.Quantity</span>
+                        <button class="btn btn-primary" onclick="updateQuantity(@item.Book.BookID, 'increase')">+</button>
                     </td>
                     <td>@(item.Quantity * item.Book.Price)</td>
                     <td>
@@ -50,4 +46,37 @@ else
         </tbody>
     </table>
     <h3>Tổng: @Model.TotalAmount</h3>
+}
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function updateQuantity(bookId, action) {
+            const url = action === 'increase' ? '@Url.Action("IncreaseQuantity")' : '@Url.Action("DecreaseQuantity")';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { bookId: bookId },
+                success: function (response) {
+                    if (response.success) {
+                        if (action === 'increase') {
+                            let quantity = parseInt($('#quantity-' + bookId).text());
+                            $('#quantity-' + bookId).text(quantity + 1);
+                        } else {
+                            let quantity = parseInt($('#quantity-' + bookId).text());
+                            if (quantity > 1) {
+                                $('#quantity-' + bookId).text(quantity - 1);
+                            } else {
+                                $('#item-' + bookId).remove();
+                            }
+                        }
+                    } else {
+                        window.location.href = response.redirectUrl;
+                    }
+                },
+                error: function () {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                }
+            });
+        }
+    </script>
 }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using TestWeb.Data;
+using TestWeb.Models;
 
 public class OrderStatusUpdateService : IHostedService
 {
@@ -32,20 +34,41 @@ public class OrderStatusUpdateService : IHostedService
 
                 foreach (var order in orders)
                 {
-                    // Cập nhật trạng thái đơn hàng theo logic của bạn
+                    // Cập nhật trạng thái đơn hàng
                     if (order.Status == "Pending Confirmation")
                     {
-                        order.Status = "Waiting for Pickup"; // Ví dụ chuyển sang trạng thái khác
+                        order.Status = "Waiting for Pickup";
                     }
                     else if (order.Status == "Waiting for Pickup")
                     {
-                        order.Status = "Waiting for Delivery"; // Tiếp tục chuyển
+                        order.Status = "Waiting for Delivery";
                     }
                     else if (order.Status == "Waiting for Delivery")
                     {
-                        order.Status = "Complete";
+                        order.Status = "Delivered";
+
+                        // Ghi nhận doanh thu khi đơn hàng hoàn tất
+                        var revenue = await _context.Revenues
+                            .FirstOrDefaultAsync(r => r.Date == DateTime.Today);
+
+                        if (revenue == null)
+                        {
+                            revenue = new Revenue
+                            {
+                                Date = DateTime.Today,
+                                TotalSales = order.TotalAmount,
+                                TotalOrders = 1,
+                                TotalProfit = order.TotalAmount * 0.1m // Giả sử lợi nhuận là 10%
+                            };
+                            _context.Revenues.Add(revenue);
+                        }
+                        else
+                        {
+                            revenue.TotalSales += order.TotalAmount;
+                            revenue.TotalOrders += 1;
+                            revenue.TotalProfit += order.TotalAmount * 0.1m;
+                        }
                     }
-                    // Cập nhật đơn hàng
                     _context.Orders.Update(order);
                 }
 

@@ -20,6 +20,7 @@ namespace TestWeb.Data
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Revenue> Revenues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
