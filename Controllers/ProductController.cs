@@ -30,6 +30,10 @@ namespace TestWeb.Controllers
                 .OrderBy(x => x.Title);
             var lst = lstsanpham.ToPagedList(pageNumber, pageSize);
             ViewBag.Query = query;
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ProductList", lst);
+            }
             return View(lst);
         }
 
@@ -40,6 +44,10 @@ namespace TestWeb.Controllers
             var lstsanpham = _context.Books.AsNoTracking().Where(x => x.CategoryID == maloai).OrderBy(x => x.Title);
             var lst = lstsanpham.ToPagedList(pageNumber, pageSize);
             ViewBag.maloai = maloai;
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ProductList", lst);
+            }
             return View(lst);
         }
 
@@ -56,6 +64,10 @@ namespace TestWeb.Controllers
             int pageNumber = page ?? 1;
             var lstsanpham = _context.Books.AsNoTracking().OrderBy(x => x.Title);
             var lst = lstsanpham.ToPagedList(pageNumber, pageSize);
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ProductList", lst);
+            }
             return View(lst);
         }
     }

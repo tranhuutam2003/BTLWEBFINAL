@@ -1,33 +1,13 @@
 ﻿@{
+    ViewData["Title"] = "Search";
     Layout = "~/Views/Product/ProductLayout.cshtml";
 }
 @using X.PagedList.Mvc.Core
 @model X.PagedList.IPagedList<TestWeb.Models.Books>
 
-@foreach (var book in Model)
-{
-    <div class="col-lg-3 col-md-4 col-sm-6 mix oranges fresh-meat">
-        <div class="featured__item">
-            <div class="featured__item__pic set-bg" data-setbg="@Url.Content("~/img/products/" + @book.ImageURL)">
-                <ul class="featured__item__pic__hover">
-                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                    <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                    <li>
-                        <a href="@Url.Action("AddToCart", "Cart", new { bookId = book.BookID })">
-                            <i class="fa fa-shopping-cart"></i>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="featured__item__text">
-                <h6><a asp-controller="Product" asp-action="BookDetail" asp-route-mabook="@book.BookID">@book.Title</a></h6>
-                <h5>@book.Price</h5>
-            </div>
-        </div>
+<div class="container">
+    <!-- Thêm container -->
+    <div id="product-container">
+        @await Html.PartialAsync("_ProductList", Model)
     </div>
-}
-
-<!-- Render pagination with query -->
-<div class="product__pagination">
-    @Html.PagedListPager(Model, page => Url.Action("Search", new { query = ViewBag.Query, page }))
 </div>

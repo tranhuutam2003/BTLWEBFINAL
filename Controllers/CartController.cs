@@ -41,19 +41,17 @@ namespace TestWeb.Controllers
         {
             if (!IsUserLoggedIn())
             {
-                return RedirectToAction("Login", "Account");
+                return Json(new { success = false, message = "Bạn cần đăng nhập để thêm vào giỏ hàng." });
             }
 
             var book = await _context.Books.FindAsync(bookId);
             if (book == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Sản phẩm không tồn tại." });
             }
 
             var phoneNumber = HttpContext.Session.GetString("PhoneNumber");
-            var cart = await _context.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
+            var cart = await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
 
             if (cart == null)
             {
@@ -64,7 +62,7 @@ namespace TestWeb.Controllers
             cart.AddItem(book, 1);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("BookList", "Product");
+            return Json(new { success = true, message = "Đã thêm vào giỏ hàng!" });
         }
 
         [HttpPost]
