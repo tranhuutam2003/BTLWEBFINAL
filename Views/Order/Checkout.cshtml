@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Order/OrderLayout.cshtml";
 }
-
+@using System.Globalization
 @model TestWeb.Models.Order
 
 <h2>Đặt Hàng</h2>
@@ -17,13 +17,13 @@
 }
 
 <form asp-action="PlaceOrder" method="post">
-    <h4>Giỏ hàng của bạn:</h4>
+    <h4>Your Cart:</h4>
     <table class="table">
         <thead>
             <tr>
-                <th>Tên Sản Phẩm</th>
-                <th>Số Lượng</th>
-                <th>Giá</th>
+                <th>Title</th>
+                <th>Quantity</th>
+                <th>Price (VND)</th>
             </tr>
         </thead>
         <tbody>
@@ -32,18 +32,18 @@
                 <tr>
                     <td>@item.Book?.Title</td>
                     <td>@item.Quantity</td>
-                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Price.ToString("C", new CultureInfo("vi-VN"))</td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <h5>Tổng cộng: @Model.TotalAmount.ToString("C")</h5>
+    <h5>Total Amount: @Model.TotalAmount.ToString("C", new CultureInfo("vi-VN"))</h5>
 
     <div class="form-group">
-        <label for="shippingAddress">Địa chỉ giao hàng:</label>
+        <label for="shippingAddress">Shipping Address:</label>
         <input type="text" name="shippingAddress" class="form-control" required />
     </div>
 
-    <button type="submit" class="btn btn-primary">Đặt hàng</button>
+    <button type="submit" class="btn btn-primary">Place Order</button>
 </form>

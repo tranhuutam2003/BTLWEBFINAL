@@ -2,24 +2,24 @@
     Layout = "~/Views/Cart/CartLayout.cshtml";
      
 }
-
-<h2>Giỏ hàng</h2>
+@using System.Globalization
+<h2>Your Cart</h2>
 
 @if (Model.Items.Count == 0)
 {
-    <p>Giỏ hàng của bạn đang trống.</p>
+    <p>Your cart is empty</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Sản phẩm</th>
-                <th>Hình ảnh</th> <!-- Thêm hình ảnh -->
-                <th>Giá</th>
-                <th>Số lượng</th>
-                <th>Tổng</th>
-                <th>Hành động</th>
+                <th>Title</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+
             </tr>
         </thead>
         <tbody>
@@ -31,21 +31,21 @@ else
                         <div width="100" class="featured__item__pic set-bg" data-setbg="@Url.Content("~/img/products/" + @item.Book.ImageURL)">
                             <!-- Đây là chỗ sử dụng hình nền cho sản phẩm -->
                         </div>
-                    <td>@item.Book.Price</td>
+                    <td>@item.Book.Price.ToString("C", new CultureInfo("vi-VN"))</td>
                     <td>
                         <button class="btn btn-danger" onclick="updateQuantity(@item.Book.BookID, 'decrease')">-</button>
                         <span id="quantity-@item.Book.BookID">@item.Quantity</span>
                         <button class="btn btn-primary" onclick="updateQuantity(@item.Book.BookID, 'increase')">+</button>
                     </td>
-                    <td>@(item.Quantity * item.Book.Price)</td>
+                    <td>@((item.Quantity * item.Book.Price).ToString("C", new CultureInfo("vi-VN")))</td>
                     <td>
-                        <a asp-action="RemoveFromCart" asp-route-bookId="@item.Book.BookID" class="btn btn-danger">Xóa</a>
+                        <a asp-action="RemoveFromCart" asp-route-bookId="@item.Book.BookID" class="btn btn-danger">Remove</a>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-    <h3>Tổng: @Model.TotalAmount</h3>
+    <h3>Total: @Model.TotalAmount.ToString("C", new CultureInfo("vi-VN"))</h3>
 }
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
