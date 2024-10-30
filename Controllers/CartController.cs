@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using TestWeb.Data;
 using TestWeb.Models;
 using System.Globalization;
+using TestWeb.Models.Authentication;
 
 namespace TestWeb.Controllers
 {
+    [Authentication(0)]
     public class CartController : Controller
     {
         private readonly BookContext _context;

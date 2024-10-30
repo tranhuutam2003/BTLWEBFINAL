@@ -59,64 +59,8 @@ namespace TestWeb.Controllers
             return View(order);
         }
 
-
-
-        // Đặt hàng và gửi email xác nhận
-        //[HttpPost]
-        //public ActionResult PlaceOrder(Order order)
-        //{
-        //    var userPhoneNumber = HttpContext.Session.GetString("PhoneNumber");
-        //    if (string.IsNullOrEmpty(userPhoneNumber))
-        //    {
-        //        return RedirectToAction("Login", "Account");
-        //    }
-
-        //    // Lấy giỏ hàng hiện tại
-        //    var cart = _context.Carts
-        //        .Include(c => c.Items)
-        //        .ThenInclude(i => i.Book)
-        //        .FirstOrDefault(c => c.PhoneNumber == userPhoneNumber);
-
-        //    if (cart == null || !cart.Items.Any())
-        //    {
-        //        TempData["Error"] = "Giỏ hàng của bạn hiện đang trống.";
-        //        return RedirectToAction("Index", "Cart");
-        //    }
-
-        //    // Tạo đơn hàng mới
-        //    order.PhoneNumber = userPhoneNumber;
-        //    order.OrderDate = DateTime.Now;
-        //    order.Status = "Pending Confirmation";
-
-        //    _context.Orders.Add(order);
-        //    _context.SaveChanges();
-
-        //    // Thêm chi tiết đơn hàng từ các mục trong giỏ hàng
-        //    foreach (var item in cart.Items)
-        //    {
-        //        var orderDetail = new OrderDetail
-        //        {
-        //            OrderID = order.OrderID,
-        //            BookID = item.Book?.BookID ?? 0,
-        //            Quantity = item.Quantity,
-        //            Price = item.Book?.Price ?? 0
-        //        };
-        //        _context.OrderDetails.Add(orderDetail);
-        //    }
-
-        //    _context.SaveChanges();
-
-        //    // Xóa giỏ hàng sau khi đặt hàng thành công
-        //    _context.CartItems.RemoveRange(cart.Items);
-        //    _context.SaveChanges();
-
-        //    TempData["Success"] = "Đặt hàng thành công!";
-        //    SendOrderConfirmationEmail(userPhoneNumber, order.OrderID);
-
-        //    return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
-        //}
         [HttpPost]
-        public ActionResult PlaceOrder(Order order)//update lại
+        public ActionResult PlaceOrder(Order order)
         {
             var userPhoneNumber = HttpContext.Session.GetString("PhoneNumber");
             if (string.IsNullOrEmpty(userPhoneNumber))
@@ -140,14 +84,12 @@ namespace TestWeb.Controllers
             order.PhoneNumber = userPhoneNumber;
             order.OrderDate = DateTime.Now;
             order.Status = "Pending Confirmation";
-
-            // Tính toán tổng số tiền từ giỏ hàng
-            order.TotalAmount = cart.TotalAmount; // Hoặc tính toán lại từ OrderDetail nếu cần
+            order.TotalAmount = cart.TotalAmount;
 
             _context.Orders.Add(order);
-            _context.SaveChanges(); // Lưu đơn hàng đầu tiên để có OrderID
+            _context.SaveChanges();
 
-            // Thêm chi tiết đơn hàng từ các mục trong giỏ hàng
+            // Thêm chi tiết đơn hàng và cập nhật số lượng tồn kho
             foreach (var item in cart.Items)
             {
                 var orderDetail = new OrderDetail
@@ -158,9 +100,21 @@ namespace TestWeb.Controllers
                     Price = item.Book?.Price ?? 0
                 };
                 _context.OrderDetails.Add(orderDetail);
+
+                // Cập nhật số lượng sản phẩm trong kho
+                var book = item.Book;
+                if (book != null && book.StockQuantity >= item.Quantity)
+                {
+                    book.StockQuantity -= item.Quantity; // Giảm số lượng trong kho
+                }
+                else
+                {
+                    TempData["Error"] = $"Sản phẩm {book?.Title} không đủ số lượng trong kho.";
+                    return RedirectToAction("Index", "Cart");
+                }
             }
 
-            _context.SaveChanges(); // Lưu chi tiết đơn hàng
+            _context.SaveChanges();
 
             // Xóa giỏ hàng sau khi đặt hàng thành công
             _context.CartItems.RemoveRange(cart.Items);
@@ -171,7 +125,6 @@ namespace TestWeb.Controllers
 
             return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
         }
-
 
         public IActionResult TrackOrder()
         {

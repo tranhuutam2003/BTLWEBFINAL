@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TestWeb.Data;
+using TestWeb.Models.Authentication;
 
 namespace TestWeb.Controllers
 {
+    [Authentication(1)]
     public class RevenueController : Controller
     {
         private readonly BookContext _context;
