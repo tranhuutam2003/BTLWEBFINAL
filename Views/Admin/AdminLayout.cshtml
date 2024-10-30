@@ -165,19 +165,12 @@
                         </a>
                         <div class="collapse" id="category-management">
                             <ul class="nav flex-column sub-menu">
-                                <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="Categories">Product Categories</a></li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="Categories">Product Catalog</a></li>
                                 <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="Addcategory">Add Category</a></li>
                                 <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="SearchCategories">Search Categories</a></li>
                             </ul>
                         </div>
                     </li>
-
-                    <li class="nav-item">
-                        <a asp-controller="Order" asp-action="AdminViewOrders">
-                            Orders
-                        </a>
-                    </li>
-
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Revenue" asp-action="RevenueCharts">
                             <span class="menu-title">Charts</span>
@@ -185,9 +178,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../../pages/tables/basic-table.html">
-                            <span class="menu-title">Tables</span>
-                            <i class="mdi mdi-table-large menu-icon"></i>
+                        <a class="nav-link" asp-controller="Order" asp-action="AdminViewOrders">
+                            <span class="menu-title">Orders</span>
+                            <i class="mdi mdi-cart menu-icon"></i> <!-- Changed icon to a cart icon -->
                         </a>
                     </li>
                 </ul>

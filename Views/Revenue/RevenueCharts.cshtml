@@ -2,18 +2,18 @@
     Layout = "~/Views/Admin/AdminLayout.cshtml";
 }
 
-<h2>Biểu đồ Doanh thu</h2>
+<h2>Revenue Chart</h2>
 
-<!-- Form chọn ngày -->
+<!-- Date selection form -->
 <div>
-    <label for="startDate">Từ ngày:</label>
+    <label for="startDate">From date:</label>
     <input type="date" id="startDate" name="startDate">
-    <label for="endDate">Đến ngày:</label>
+    <label for="endDate">To date:</label>
     <input type="date" id="endDate" name="endDate">
-    <button onclick="loadRevenueByDateRange()">Xem Doanh thu</button>
+    <button onclick="loadRevenueByDateRange()">View Revenue</button>
 </div>
 
-<!-- Biểu đồ -->
+<!-- Chart -->
 <canvas id="customRevenueChart" width="800" height="400"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,7 +23,7 @@
         const endDate = document.getElementById('endDate').value;
 
         if (!startDate || !endDate) {
-            alert("Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+            alert("Please select a start date and an end date.");
             return;
         }
 
@@ -39,7 +39,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Doanh thu theo ngày',
+                    label: 'Daily Revenue',
                     data: values,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -48,8 +48,8 @@
             },
             options: {
                 scales: {
-                    x: { title: { display: true, text: 'Ngày' } },
-                    y: { title: { display: true, text: 'Doanh thu (VND)' } }
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Revenue (VND)' } }
                 }
             }
         });

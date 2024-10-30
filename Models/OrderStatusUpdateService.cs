@@ -29,7 +29,7 @@ public class OrderStatusUpdateService : IHostedService
 
                 // Cập nhật trạng thái đơn hàng
                 var orders = _context.Orders
-                    .Where(o => o.Status != "Delivered" && o.Status != "Cancelled")
+                    .Where(o => o.Status != "Complete" && o.Status != "Cancelled")
                     .ToList();
 
                 foreach (var order in orders)
@@ -45,7 +45,7 @@ public class OrderStatusUpdateService : IHostedService
                     }
                     else if (order.Status == "Waiting for Delivery")
                     {
-                        order.Status = "Delivered";
+                        order.Status = "Complete";
 
                         // Ghi nhận doanh thu khi đơn hàng hoàn tất
                         var revenue = await _context.Revenues
