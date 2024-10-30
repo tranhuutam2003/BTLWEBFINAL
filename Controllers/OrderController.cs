@@ -30,10 +30,10 @@ namespace TestWeb.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Lấy giỏ hàng của người dùng hiện tại
+            // Lấy giỏ hàng của người dùng hiện tại và bao gồm cả thông tin sách trong từng mục giỏ hàng
             var cart = _context.Carts
                 .Include(c => c.Items)
-                .ThenInclude(i => i.Book)
+                    .ThenInclude(i => i.Book)  // Bao gồm thông tin của Book
                 .FirstOrDefault(c => c.PhoneNumber == userPhoneNumber);
 
             if (cart == null || !cart.Items.Any())
@@ -48,14 +48,18 @@ namespace TestWeb.Controllers
                 OrderDetails = cart.Items.Select(item => new OrderDetail
                 {
                     BookID = item.Book?.BookID ?? 0,
+                    Book = item.Book,  // Gán cả đối tượng Book để đảm bảo không bị null
                     Quantity = item.Quantity,
                     Price = item.Book?.Price ?? 0
                 }).ToList(),
-                TotalAmount = cart.TotalAmount
+                TotalAmount = cart.TotalAmount,
+                PhoneNumber = userPhoneNumber
             };
 
             return View(order);
         }
+
+
 
         // Đặt hàng và gửi email xác nhận
         //[HttpPost]

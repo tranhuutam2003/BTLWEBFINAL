@@ -5,18 +5,18 @@
 @model List<TestWeb.Models.Order>
 
 @{
-    ViewData["Title"] = "Theo dõi đơn hàng";
+    ViewData["Title"] = "Order Tracking";
 }
 
-<h2>Theo dõi đơn hàng</h2>
+<h2>Order Tracking</h2>
 
 <table>
     <thead>
         <tr>
-            <th>Mã đơn hàng</th>
-            <th>Trạng thái</th>
-            <th>Ngày đặt hàng</th>
-            <th>Chi tiết</th>
+            <th>OrderID</th>
+            <th>Status</th>
+            <th>Order Date</th>
+            <th>Detail</th>
         </tr>
     </thead>
     <tbody>
@@ -27,7 +27,7 @@
                 <td>@order.Status</td>
                 <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
-                    <a href="@Url.Action("OrderDetails", "Order", new { orderId = order.OrderID })">Xem chi tiết</a>
+                    <a href="@Url.Action("OrderDetails", "Order", new { orderId = order.OrderID })">See Details</a>
                 </td>
             </tr>
         }
@@ -41,7 +41,7 @@
         .build();
 
     connection.on("OrderStatusUpdated", function () {
-        alert("Trạng thái đơn hàng đã được cập nhật!");
+        alert("Order status has been updated!");
         location.reload(); // Tải lại trang để xem các trạng thái mới
     });
 

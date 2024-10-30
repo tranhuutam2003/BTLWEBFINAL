@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TestWeb.Data;
 using TestWeb.Models;
+using System.Globalization;
 
 namespace TestWeb.Controllers
 {
@@ -147,6 +148,19 @@ namespace TestWeb.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTotalAmount()
+        {
+            var phoneNumber = HttpContext.Session.GetString("PhoneNumber");
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Book)
+                .FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
+
+            var totalAmount = cart?.Items.Sum(i => i.Quantity * i.Book.Price) ?? 0;
+            return Json(new { totalAmount = totalAmount.ToString("C", new CultureInfo("vi-VN")) });
         }
     }
 }

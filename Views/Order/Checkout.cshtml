@@ -30,7 +30,7 @@
             @foreach (var item in Model.OrderDetails)
             {
                 <tr>
-                    <td>@item.Book?.Title</td>
+                    <td>@item.Book.Title</td>
                     <td>@item.Quantity</td>
                     <td>@item.Price.ToString("C", new CultureInfo("vi-VN"))</td>
                 </tr>

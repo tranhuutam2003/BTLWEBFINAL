@@ -37,15 +37,16 @@ else
                         <span id="quantity-@item.Book.BookID">@item.Quantity</span>
                         <button class="btn btn-primary" onclick="updateQuantity(@item.Book.BookID, 'increase')">+</button>
                     </td>
-                    <td>@((item.Quantity * item.Book.Price).ToString("C", new CultureInfo("vi-VN")))</td>
+                    <td id="price-@item.Book.BookID" data-price="@item.Book.Price">@item.Book.Price.ToString("C", new CultureInfo("vi-VN"))</td>
+                    <td id="total-@item.Book.BookID">@((item.Quantity * item.Book.Price).ToString("C", new CultureInfo("vi-VN")))</td>
                     <td>
-                        <a asp-action="RemoveFromCart" asp-route-bookId="@item.Book.BookID" class="btn btn-danger">Remove</a>
+                        <button type="button" class="btn btn-danger" onclick="confirmRemove('@item.Book?.Title', @item.CartItemID)">Remove</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-    <h3>Total: @Model.TotalAmount.ToString("C", new CultureInfo("vi-VN"))</h3>
+    <h3>Total: <span id="cart-total">@Model.TotalAmount.ToString("C", new CultureInfo("vi-VN"))</span></h3>
 }
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -58,17 +59,17 @@ else
                 data: { bookId: bookId },
                 success: function (response) {
                     if (response.success) {
-                        if (action === 'increase') {
-                            let quantity = parseInt($('#quantity-' + bookId).text());
-                            $('#quantity-' + bookId).text(quantity + 1);
-                        } else {
-                            let quantity = parseInt($('#quantity-' + bookId).text());
-                            if (quantity > 1) {
-                                $('#quantity-' + bookId).text(quantity - 1);
-                            } else {
-                                $('#item-' + bookId).remove();
-                            }
-                        }
+                        // Cập nhật số lượng sản phẩm
+                        let quantity = parseInt($('#quantity-' + bookId).text());
+                        $('#quantity-' + bookId).text(action === 'increase' ? quantity + 1 : quantity - 1);
+
+                        // Cập nhật tổng tiền cho sản phẩm này
+                        const price = parseFloat($('#price-' + bookId).data('price'));
+                        const newTotal = price * (action === 'increase' ? quantity + 1 : quantity - 1);
+                        $('#total-' + bookId).text(newTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+
+                        // Gọi AJAX để cập nhật lại tổng tiền giỏ hàng
+                        updateCartTotal();
                     } else {
                         window.location.href = response.redirectUrl;
                     }
@@ -78,5 +79,27 @@ else
                 }
             });
         }
+
+        function updateCartTotal() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetTotalAmount")',
+                success: function (response) {
+                    $('#cart-total').text(response.totalAmount);
+                },
+                error: function () {
+                    alert('Không thể cập nhật tổng tiền giỏ hàng.');
+                }
+            });
+        }
     </script>
 }
+
+<script>
+    function confirmRemove(productName, cartItemId) {
+        if (confirm("Bạn có chắc muốn xóa sản phẩm '" + productName + "' khỏi giỏ hàng không?")) {
+            // Gửi yêu cầu xóa đến controller
+            window.location.href = '/Cart/RemoveFromCart?cartItemId=' + cartItemId;
+        }
+    }
+</script>
