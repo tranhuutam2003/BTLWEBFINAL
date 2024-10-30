@@ -89,12 +89,13 @@ namespace TestWeb.Controllers
                 {
                     cart.AddItem(book, 1);
                     await _context.SaveChangesAsync();
-                    return Json(new { success = true, quantity = cart.Items.First(i => i.Book.BookID == bookId).Quantity });
+                    return Json(new { success = true, quantity = cart.Items.First(i => i.Book.BookID == bookId).Quantity, totalAmount = GetCartTotalAmount(cart) });
                 }
             }
 
             return Json(new { success = false });
         }
+
         [HttpPost]
         public async Task<IActionResult> DecreaseQuantity(int bookId)
         {
@@ -123,11 +124,16 @@ namespace TestWeb.Controllers
                         cart.RemoveItem(bookId);
                     }
                     await _context.SaveChangesAsync();
-                    return Json(new { success = true, quantity = item.Quantity });
+                    return Json(new { success = true, quantity = item?.Quantity ?? 0, totalAmount = GetCartTotalAmount(cart).ToString("C", new CultureInfo("vi-VN")) });
                 }
             }
 
             return Json(new { success = false });
+        }
+
+        private decimal GetCartTotalAmount(Cart cart)
+        {
+            return cart?.Items.Sum(i => i.Quantity * i.Book.Price) ?? 0;
         }
 
         public async Task<IActionResult> RemoveFromCart(int bookId)
@@ -162,6 +168,7 @@ namespace TestWeb.Controllers
                 .FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
 
             var totalAmount = cart?.Items.Sum(i => i.Quantity * i.Book.Price) ?? 0;
+            // Sửa lại dòng này để chỉ sử dụng một tham số
             return Json(new { totalAmount = totalAmount.ToString("C", new CultureInfo("vi-VN")) });
         }
     }

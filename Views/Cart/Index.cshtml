@@ -3,6 +3,7 @@
      
 }
 @using System.Globalization
+
 <h2>Your Cart</h2>
 
 @if (Model.Items.Count == 0)
@@ -19,7 +20,6 @@ else
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Total</th>
-
             </tr>
         </thead>
         <tbody>
@@ -31,75 +31,114 @@ else
                         <div width="100" class="featured__item__pic set-bg" data-setbg="@Url.Content("~/img/products/" + @item.Book.ImageURL)">
                             <!-- Đây là chỗ sử dụng hình nền cho sản phẩm -->
                         </div>
-                    <td>@item.Book.Price.ToString("C", new CultureInfo("vi-VN"))</td>
+                    <td id="price-@item.Book.BookID" data-price="@item.Book.Price">@item.Book.Price.ToString("C", new CultureInfo("vi-VN"))</td>
                     <td>
                         <button class="btn btn-danger" onclick="updateQuantity(@item.Book.BookID, 'decrease')">-</button>
-                        <span id="quantity-@item.Book.BookID">@item.Quantity</span>
+                        <input type="number" id="quantity-@item.Book.BookID" value="@item.Quantity" min="0" onchange="confirmRemoveIfZero(@item.Book.BookID)" />
                         <button class="btn btn-primary" onclick="updateQuantity(@item.Book.BookID, 'increase')">+</button>
                     </td>
-                    <td id="price-@item.Book.BookID" data-price="@item.Book.Price">@item.Book.Price.ToString("C", new CultureInfo("vi-VN"))</td>
                     <td id="total-@item.Book.BookID">@((item.Quantity * item.Book.Price).ToString("C", new CultureInfo("vi-VN")))</td>
                     <td>
-                        <button type="button" class="btn btn-danger" onclick="confirmRemove('@item.Book?.Title', @item.CartItemID)">Remove</button>
+                        <button type="button" class="btn btn-danger" onclick="confirmRemove('@item.Book?.Title', @item.Book.BookID)">Remove</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-    <h3>Total: <span id="cart-total">@Model.TotalAmount.ToString("C", new CultureInfo("vi-VN"))</span></h3>
+
 }
+
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         function updateQuantity(bookId, action) {
-            const url = action === 'increase' ? '@Url.Action("IncreaseQuantity")' : '@Url.Action("DecreaseQuantity")';
+            const url = action === 'increase' ? '@Url.Action("IncreaseQuantity", "Cart")' : '@Url.Action("DecreaseQuantity", "Cart")';
             $.ajax({
                 type: "POST",
                 url: url,
                 data: { bookId: bookId },
                 success: function (response) {
                     if (response.success) {
-                        // Cập nhật số lượng sản phẩm
-                        let quantity = parseInt($('#quantity-' + bookId).text());
-                        $('#quantity-' + bookId).text(action === 'increase' ? quantity + 1 : quantity - 1);
-
-                        // Cập nhật tổng tiền cho sản phẩm này
-                        const price = parseFloat($('#price-' + bookId).data('price'));
-                        const newTotal = price * (action === 'increase' ? quantity + 1 : quantity - 1);
-                        $('#total-' + bookId).text(newTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
-
-                        // Gọi AJAX để cập nhật lại tổng tiền giỏ hàng
-                        updateCartTotal();
-                    } else {
+                        $('#quantity-' + bookId).val(response.quantity);
+                        updateCartTotal(response.totalAmount);
+                        $('#total-' + bookId).text((response.quantity * $('#price-' + bookId).data('price')).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+                    } else if (response.redirectUrl) {
                         window.location.href = response.redirectUrl;
                     }
                 },
                 error: function () {
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                    alert('Không thể cập nhật số lượng. Vui lòng thử lại.');
                 }
             });
         }
 
-        function updateCartTotal() {
+        function decreaseQuantity(bookId) {
             $.ajax({
-                type: "GET",
-                url: '@Url.Action("GetTotalAmount")',
+                type: "POST",
+                url: '@Url.Action("DecreaseQuantity", "Cart")',
+                data: { bookId: bookId },
                 success: function (response) {
-                    $('#cart-total').text(response.totalAmount);
+                    if (response.success) {
+                        $('#quantity-' + bookId).val(response.quantity);
+                        updateCartTotal(response.totalAmount);
+                    } else if (response.redirectUrl) {
+                        window.location.href = response.redirectUrl;
+                    }
                 },
                 error: function () {
-                    alert('Không thể cập nhật tổng tiền giỏ hàng.');
+                    alert('Không thể cập nhật số lượng. Vui lòng thử lại.');
                 }
             });
         }
+
+        function updateCartTotal(totalAmount) {
+            $('#cart-total').text(totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+        }
+
+        function confirmRemoveIfZero(bookId) {
+            const quantity = parseInt(document.getElementById("quantity-" + bookId).value);
+
+            if (quantity === 0) {
+                if (confirm("Số lượng sản phẩm đã về 0. Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?")) {
+                    window.location.href = '/Cart/RemoveFromCart?bookId=' + bookId;
+                } else {
+                    document.getElementById("quantity-" + bookId).value = 1;
+                    updateQuantity(bookId, 'increase'); // Đặt lại giá trị về 1
+                }
+            }
+        }
+
+        function confirmRemove(productName, bookId) {
+            if (confirm("Bạn có chắc muốn xóa sản phẩm '" + productName + "' khỏi giỏ hàng không?")) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("RemoveFromCart", "Cart")',
+                    data: { bookId: bookId },
+                    success: function (response) {
+                        if (response.success) {
+                            // Cập nhật tổng tiền mới
+                            updateCartTotal();
+
+                            // Xóa hàng sản phẩm khỏi bảng
+                            $('#row-' + bookId).remove();
+
+                            // Kiểm tra nếu giỏ hàng trống, hiển thị thông báo
+                            if ($('tbody tr').length === 0) {
+                                $('table').hide();
+                                $('h2').after('<p>Your cart is empty</p>');
+                            }
+                        } else if (response.redirectUrl) {
+                            // Nếu cần đăng nhập, chuyển hướng đến trang đăng nhập
+                            window.location.href = response.redirectUrl;
+                        }
+                    },
+                    error: function () {
+                        alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
+                    }
+                });
+            }
+        }
     </script>
+
 }
 
-<script>
-    function confirmRemove(productName, cartItemId) {
-        if (confirm("Bạn có chắc muốn xóa sản phẩm '" + productName + "' khỏi giỏ hàng không?")) {
-            // Gửi yêu cầu xóa đến controller
-            window.location.href = '/Cart/RemoveFromCart?cartItemId=' + cartItemId;
-        }
-    }
-</script>
