@@ -138,7 +138,12 @@ else
                 });
             }
         }
+        function confirmRemove(productName, bookId) {
+            if (confirm("Bạn có chắc muốn xóa sản phẩm '" + productName + "' khỏi giỏ hàng không?")) {
+                // Gửi yêu cầu xóa đến controller
+                window.location.href = '/Cart/RemoveFromCart?bookId=' + bookId;
+            }
+        }
     </script>
 
 }
-
