@@ -11,7 +11,3 @@
         @await Html.PartialAsync("_ProductList", Model)
     </div>
 </div>
-
-<div class="product__pagination">
-    @Html.PagedListPager(Model, page => Url.Action("SanPhamTheoLoai", new { maloai = ViewBag.maloai, page }))
-</div>

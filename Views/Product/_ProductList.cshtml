@@ -27,7 +27,7 @@
 </div>
 
 <div class="product__pagination">
-    @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { page }))
+    @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { query = ViewBag.Query, maloai = ViewBag.maloai, page }))
 </div>
 
 <script>
