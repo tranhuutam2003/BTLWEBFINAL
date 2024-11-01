@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Net;
 using Newtonsoft.Json;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace TestWeb.Controllers
 {
@@ -26,9 +27,8 @@ namespace TestWeb.Controllers
             return View();
         }
 
-        // Gửi mã xác nhận qua email
         [HttpPost]
-        public IActionResult SendVerificationEmail(string email)
+        public IActionResult ResetPassword(string email)
         {
             var existingUser = _context.Users.FirstOrDefault(u => u.Email == email);
             if (existingUser == null)
@@ -36,6 +36,15 @@ namespace TestWeb.Controllers
                 return Json(new { success = false, message = "Email chưa tồn tại trong hệ thống." });
             }
 
+            // Gửi mã xác nhận qua email cho người dùng
+            SendVerificationEmail(email);
+            return Json(new { success = true, message = "Mã xác nhận đã được gửi tới email của bạn." });
+        }
+
+        // Gửi mã xác nhận qua email
+        [HttpPost]
+        public IActionResult SendVerificationEmail(string email)
+        {
             string verificationCode = GenerateVerificationCode();
             HttpContext.Session.SetString(VerificationCodeKey, verificationCode);
             HttpContext.Session.SetString(EmailForVerification, email);
@@ -174,12 +183,14 @@ namespace TestWeb.Controllers
                 return View(user);
             }
 
-            // Kiểm tra mã xác nhận
-            string storedCode = TempData[VerificationCodeKey] as string;
-            if (string.IsNullOrEmpty(storedCode) || storedCode != VerificationCode)
+            // Kiểm tra mã xác nhận từ Session thay vì TempData
+            string storedCode = HttpContext.Session.GetString(VerificationCodeKey);
+            string emailForVerification = HttpContext.Session.GetString(EmailForVerification);
+
+            // Xác minh mã xác nhận và email
+            if (string.IsNullOrEmpty(storedCode) || storedCode != VerificationCode || emailForVerification != user.Email)
             {
                 ModelState.AddModelError("VerificationCode", "Mã xác nhận không đúng. Vui lòng thử lại.");
-                TempData.Keep(VerificationCodeKey);
                 return View(user);
             }
 
@@ -189,6 +200,11 @@ namespace TestWeb.Controllers
                 user.Role = 0; // Đặt mặc định là khách hàng
                 _context.Users.Add(user);
                 _context.SaveChanges();
+
+                // Xóa mã xác nhận và email khỏi Session sau khi sử dụng thành công
+                HttpContext.Session.Remove(VerificationCodeKey);
+                HttpContext.Session.Remove(EmailForVerification);
+
                 TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
                 return RedirectToAction("Login");
             }

@@ -64,7 +64,8 @@
             });
 
             $('#registerForm').submit(function (e) {
-                if ($('#VerificationCode').val() == '') {
+                var codeEntered = $('#VerificationCode').val();
+                if (codeEntered === '') {
                     $('#verificationMessage').text('Please enter the verification code.').removeClass('text-success').addClass('text-danger');
                     e.preventDefault();
                 }
