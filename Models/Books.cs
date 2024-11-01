@@ -33,7 +33,7 @@ namespace TestWeb.Models
 
         [NotMapped] // Không lưu thuộc tính này vào cơ sở dữ liệu
         public IFormFile? ImageFile { get; set; }
-
+        [Required(ErrorMessage = "Ảnh không được để trống.")]
         public string? ImageURL { get; set; }
 
         public Category? Category { get; set; }

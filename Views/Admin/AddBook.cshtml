@@ -79,24 +79,31 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('imageFileInput').addEventListener('change', function (event) {
-        var file = event.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var preview = document.getElementById('previewImage');
-                preview.src = e.target.result; // Lấy đường dẫn tạm thời của hình ảnh
-                preview.style.display = 'block'; // Hiện thẻ img
-            };
-            reader.readAsDataURL(file); // Đọc tệp ảnh
-        } else {
-            document.getElementById('previewImage').style.display = 'none'; // Ẩn nếu không có tệp
-        }
-    });
-</script>
 
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts{
+    <script>
+        document.getElementById('imageFileInput').addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('previewImage');
+                    preview.src = e.target.result; // Lấy đường dẫn tạm thời của hình ảnh
+                    preview.style.display = 'block'; // Hiện thẻ img
+
+                    // Cập nhật trường ImageURL với tên tệp
+                    document.getElementById('imageURL').value = file.name;
+                };
+                reader.readAsDataURL(file); // Đọc tệp ảnh
+            } else {
+                document.getElementById('previewImage').style.display = 'none'; // Ẩn nếu không có tệp
+                document.getElementById('imageURL').value = ''; // Xóa giá trị trong trường ImageURL
+            }
+        });
+    </script>
+
+}
