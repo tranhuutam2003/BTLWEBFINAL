@@ -37,16 +37,12 @@ namespace TestWeb.Controllers
             }
 
             string verificationCode = GenerateVerificationCode();
-
-            // Lưu mã xác nhận và email vào Session
             HttpContext.Session.SetString(VerificationCodeKey, verificationCode);
             HttpContext.Session.SetString(EmailForVerification, email);
-
             SendEmail(email, verificationCode);
 
-            return Json(new { success = false, message = "Email đã tồn tại. Vui lòng sử dụng email khác." });
+            return Json(new { success = true, message = "Mã xác nhận đã được gửi tới email của bạn." });
         }
-
 
         private string GenerateVerificationCode()
         {
@@ -61,11 +57,11 @@ namespace TestWeb.Controllers
                 var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
                     Port = 587,
-                    Credentials = new NetworkCredential("your-email@gmail.com", "your-app-password"), // Sử dụng mật khẩu ứng dụng nếu cần
+                    Credentials = new NetworkCredential("tam62533@gmail.com", "dotnnpjevidbdxjr"), // Sử dụng mật khẩu ứng dụng nếu cần
                     EnableSsl = true,
                 };
 
-                smtpClient.Send("your-email@gmail.com", email, "Mã xác nhận", $"Mã xác nhận của bạn là: {code}");
+                smtpClient.Send("tam62533@gmail.com", email, "Mã xác nhận", $"Mã xác nhận của bạn là: {code}");
             }
             catch (SmtpException smtpEx)
             {
@@ -170,40 +166,36 @@ namespace TestWeb.Controllers
         [HttpPost]
         public IActionResult Register(User user, string VerificationCode)
         {
-            string storedCode = TempData[VerificationCodeKey] as string;
-            string email = TempData[EmailForVerification] as string;
-
-            if (string.IsNullOrEmpty(storedCode) || storedCode != VerificationCode)
+            // Kiểm tra xem email đã tồn tại chưa
+            var existingUser = _context.Users.FirstOrDefault(u => u.Email == user.Email);
+            if (existingUser != null)
             {
-                ModelState.AddModelError("VerificationCode", "Mã xác nhận không đúng. Vui lòng thử lại.");
-                // Giữ lại mã xác nhận trong TempData để có thể kiểm tra lại
-                TempData.Keep(VerificationCodeKey);
-                TempData.Keep(EmailForVerification);
+                ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống.");
                 return View(user);
             }
 
+            // Kiểm tra mã xác nhận
+            string storedCode = TempData[VerificationCodeKey] as string;
+            if (string.IsNullOrEmpty(storedCode) || storedCode != VerificationCode)
+            {
+                ModelState.AddModelError("VerificationCode", "Mã xác nhận không đúng. Vui lòng thử lại.");
+                TempData.Keep(VerificationCodeKey);
+                return View(user);
+            }
+
+            // Nếu tất cả hợp lệ, thêm người dùng vào cơ sở dữ liệu
             if (ModelState.IsValid)
             {
-                // Kiểm tra lại email một lần nữa để đảm bảo
-                var existingUser = _context.Users.FirstOrDefault(u => u.Email == user.Email);
-                if (existingUser != null) // Sửa thành != null để kiểm tra xem email đã tồn tại
-                {
-                    ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống.");
-                    return View(user);
-                }
-
-
-                // Lưu người dùng vào database
-                user.Role = 0; // Mặc định là khách hàng
+                user.Role = 0; // Đặt mặc định là khách hàng
                 _context.Users.Add(user);
                 _context.SaveChanges();
-
                 TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
                 return RedirectToAction("Login");
             }
 
             return View(user);
         }
+
 
         [HttpGet]
         public IActionResult EditProfile()
