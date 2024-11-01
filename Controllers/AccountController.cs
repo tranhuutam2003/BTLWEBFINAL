@@ -31,21 +31,22 @@ namespace TestWeb.Controllers
         public IActionResult SendVerificationEmail(string email)
         {
             var existingUser = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (existingUser != null)
+            if (existingUser == null)
             {
-                return Json(new { success = false, message = "Email đã tồn tại trong hệ thống." });
+                return Json(new { success = false, message = "Email chưa tồn tại trong hệ thống." });
             }
 
             string verificationCode = GenerateVerificationCode();
 
-            // Lưu mã xác nhận và email vào TempData
-            TempData[VerificationCodeKey] = verificationCode;
-            TempData[EmailForVerification] = email;
+            // Lưu mã xác nhận và email vào Session
+            HttpContext.Session.SetString(VerificationCodeKey, verificationCode);
+            HttpContext.Session.SetString(EmailForVerification, email);
 
             SendEmail(email, verificationCode);
 
             return Json(new { success = true, message = "Mã xác nhận đã được gửi thành công." });
         }
+
 
         private string GenerateVerificationCode()
         {
@@ -60,11 +61,11 @@ namespace TestWeb.Controllers
                 var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
                     Port = 587,
-                    Credentials = new NetworkCredential("tam62533@gmail.com", "dotnnpjevidbdxjr"), // Sử dụng mật khẩu ứng dụng nếu cần
+                    Credentials = new NetworkCredential("your-email@gmail.com", "your-app-password"), // Sử dụng mật khẩu ứng dụng nếu cần
                     EnableSsl = true,
                 };
 
-                smtpClient.Send("tam62533@gmail.com", email, "Mã xác nhận", $"Mã xác nhận của bạn là: {code}");
+                smtpClient.Send("your-email@gmail.com", email, "Mã xác nhận", $"Mã xác nhận của bạn là: {code}");
             }
             catch (SmtpException smtpEx)
             {
@@ -90,12 +91,8 @@ namespace TestWeb.Controllers
         [HttpPost]
         public IActionResult ConfirmCode(string enteredCode, string newPassword, string confirmPassword)
         {
-            string storedCode = TempData[VerificationCodeKey] as string;
-            string email = TempData[EmailForVerification] as string;
-
-            // Giữ lại giá trị trong TempData để có thể sử dụng lại nếu cần
-            TempData.Keep(VerificationCodeKey);
-            TempData.Keep(EmailForVerification);
+            string storedCode = HttpContext.Session.GetString(VerificationCodeKey);
+            string email = HttpContext.Session.GetString(EmailForVerification);
 
             if (string.IsNullOrEmpty(storedCode) || storedCode != enteredCode)
             {
@@ -111,9 +108,9 @@ namespace TestWeb.Controllers
 
             UpdatePassword(email, newPassword);
 
-            // Xóa mã xác nhận và email khỏi TempData sau khi sử dụng thành công
-            TempData.Remove(VerificationCodeKey);
-            TempData.Remove(EmailForVerification);
+            // Xóa mã xác nhận và email khỏi Session sau khi sử dụng thành công
+            HttpContext.Session.Remove(VerificationCodeKey);
+            HttpContext.Session.Remove(EmailForVerification);
 
             TempData["SuccessMessage"] = "Mật khẩu đã được thay đổi thành công!";
             return RedirectToAction("Login");
@@ -132,8 +129,6 @@ namespace TestWeb.Controllers
 
         public IActionResult Login()
         {
-
-            //return View();
             return PartialView();
         }
 

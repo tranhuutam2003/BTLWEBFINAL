@@ -43,7 +43,7 @@
                 if (response.success) {
                     $('#cart-message').text(response.message).fadeIn().delay(2000).fadeOut();
                 } else {
-                    alert(response.message);
+                        alert("Bạn phải đăng nhập trước");
                 }
             },
             error: function () {
