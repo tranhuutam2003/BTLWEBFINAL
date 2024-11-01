@@ -44,7 +44,7 @@ namespace TestWeb.Controllers
 
             SendEmail(email, verificationCode);
 
-            return Json(new { success = true, message = "Mã xác nhận đã được gửi thành công." });
+            return Json(new { success = false, message = "Email đã tồn tại. Vui lòng sử dụng email khác." });
         }
 
 
@@ -186,11 +186,12 @@ namespace TestWeb.Controllers
             {
                 // Kiểm tra lại email một lần nữa để đảm bảo
                 var existingUser = _context.Users.FirstOrDefault(u => u.Email == user.Email);
-                if (existingUser != null)
+                if (existingUser != null) // Sửa thành != null để kiểm tra xem email đã tồn tại
                 {
                     ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống.");
                     return View(user);
                 }
+
 
                 // Lưu người dùng vào database
                 user.Role = 0; // Mặc định là khách hàng
