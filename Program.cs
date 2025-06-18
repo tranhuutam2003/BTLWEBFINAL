@@ -48,11 +48,9 @@ app.UseRouting();
 
 app.UseSession();
 
-app.UseAuthorization();
-
-app.UseStaticFiles();
-
 app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapHub<OrderHub>("/orderHub");
 
